@@ -1,0 +1,8 @@
+pre-commit:
+  commands:
+    biome check:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npx @biomejs/biome check .  --no-errors-on-unmatched --files-ignore-unknown=true --colors=off
+    typecheck:
+      glob: "src/**/*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npx tsc --noEmit
