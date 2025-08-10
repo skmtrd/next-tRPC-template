@@ -2,12 +2,12 @@
 
 ## 依存関係のインストール
 ```
-npm i
+pnpm i
 ```
 
 ## lefthook有効化
 ```
-npm run prepare
+pnpm  prepare
 ```
 
 ## .envの作成と設定
@@ -32,7 +32,7 @@ npx prisma db migrate dev
 
 ## サーバー起動
 ```
-npm run dev
+pnpm  dev
 ```
 
 
@@ -42,7 +42,7 @@ npm run dev
 - typecheckでエラーが出た場合は型エラーを直してから、再度コミットしてください。
 
 ```
-npm run format
+pnpm  format
 ```
 
 

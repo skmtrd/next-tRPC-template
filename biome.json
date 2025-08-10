@@ -12,9 +12,6 @@
       "**/dist/**",
       "**/build/**",
       "**/.next/**",
-      "**/frourio.ts",
-      "**/frourio.client.ts",
-      "**/frourio.server.ts",
       "**/components/ui/**"
     ]
   },
