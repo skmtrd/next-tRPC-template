@@ -1,15 +1,21 @@
 "use client";
 
 import { apiClient } from "@/lib/apiClient";
+import { TRPCClientError } from "@trpc/client";
 import { useState } from "react";
 
 const page = () => {
   const [messages, setMessages] = useState<string[]>([""]);
 
   async function sendChatMessage(message: string): Promise<void> {
-    const res = await apiClient.healthcheck.query({ message });
-
-    setMessages((prev) => [...prev, res]);
+    try {
+      const res = await apiClient.healthcheck.query({ message });
+      setMessages((prev) => [...prev, res]);
+    } catch (error) {
+      if (error instanceof TRPCClientError) {
+        console.error(error.data);
+      }
+    }
   }
 
   const [input, setInput] = useState("");
