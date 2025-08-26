@@ -1,7 +1,7 @@
 import { initTRPC } from "@trpc/server";
 import { ZodError } from "zod";
 
-const t = initTRPC.create({
+export const t = initTRPC.create({
   errorFormatter(opts) {
     const { shape, error } = opts;
     return {
@@ -16,6 +16,3 @@ const t = initTRPC.create({
     };
   },
 });
-
-export const router = t.router;
-export const procedure = t.procedure;
