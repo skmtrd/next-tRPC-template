@@ -1,6 +1,8 @@
 import { z } from "zod";
-import { procedure, router } from "../trpc";
+import { t } from "../index";
 
+const router = t.router;
+const procedure = t.procedure;
 export const healthcheckRouter = router({
   healthcheck: procedure
     .input(
