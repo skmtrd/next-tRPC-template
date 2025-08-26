@@ -4,7 +4,7 @@ pre-commit:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: npx @biomejs/biome check .  --no-errors-on-unmatched --files-ignore-unknown=true --colors=off
     typecheck:
-      run: npm run typecheck 
+      run: pnpm typecheck 
 
 
     
@@ -18,12 +18,12 @@ post-merge:
           npx prisma db push || exit 1
         fi
         true
-    npm-install-on-package-json-change:
+    pnpm-install-on-package-json-change:
       run: |
         BASE_REF=${ORIG_HEAD:-HEAD^}
         CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD | tr -d '\r')
         if echo "$CHANGED_FILES" | grep -x -q 'package.json'; then
-          npm install || exit 1
+          pnpm install || exit 1
         fi
         true
     prepare-on-lefthook-config-change:
@@ -31,6 +31,6 @@ post-merge:
         BASE_REF=${ORIG_HEAD:-HEAD^}
         CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD | tr -d '\r')
         if echo "$CHANGED_FILES" | grep -x -q 'lefthook.yml'; then
-          npm run prepare || exit 1
+          pnpm prepare || exit 1
         fi
         true
