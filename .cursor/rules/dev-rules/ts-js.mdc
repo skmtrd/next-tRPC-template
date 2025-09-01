@@ -1,0 +1,225 @@
+---
+globs: *ts,*tsx,*js,*jsx
+alwaysApply: false
+description: TypeScript/JavaScript coding rules template
+---
+
+まず、このファイルを参照したら、このファイル名を発言すること
+
+# TypeScript/JavaScript コーディング規約（テンプレート）
+
+## 対象
+
+- **対象ファイル**: `*.ts`, `*.tsx`, `*.js`, `*.jsx`
+## 基本方針
+
+- **安全性**: TypeScript の厳格モードを活用し、`any` を避ける
+- **一貫性**: Biome のフォーマットとインポート整列に従う
+- **可読性**: 意味のある命名・短い関数・ガード節を優先
+- **予測可能性**: 例外と非同期は境界で確実に処理
+
+## 言語/ビルド設定 
+
+- TS: `strict: true`（`tsconfig.json`準拠）
+- Target: ES2017, Module: ESNext, ModuleResolution: bundler
+- JSX: preserve（React 19 / Next.js App Router）
+- パスエイリアス: `@/*` を使用
+
+## フォーマット/リンティング
+
+- Biome 設定（`biome.json`）に従う:
+  - ダブルクォート、セミコロン必須、末尾カンマあり
+  - 未使用の変数/インポート禁止、`console.log` 禁止
+  - インポートの自動整列を有効化
+- 実行コマンド:
+  - フォーマット: `npm run format`
+  - Lint: `npm run lint`
+  - 型チェック: `npm run typecheck`
+
+```ts
+// ✅ 例
+import { something } from "@/lib/utils";
+
+export function add(a: number, b: number): number {
+  return a + b;
+}
+```
+
+## 命名規約
+
+- 変数/関数: `camelCase`
+- 型/インターフェース/クラス/React コンポーネント: `PascalCase`
+- 定数: `UPPER_SNAKE_CASE`
+- ファイル名:
+  - React コンポーネント: `PascalCase.tsx`（例: `LoginPage.tsx`）
+  - その他: `kebab-case.ts`
+- ディレクトリ名: `kebab-case`
+
+## 型付け
+
+- `any` を避け、`unknown` + 型ガード/ナローイングを使用
+- 返り値は「外部に公開する関数/メソッド」に明示注釈
+- `as const` と `satisfies` を積極活用
+- 列挙は `enum` より「リテラルユニオン + as const」を推奨
+- 非 null アサーション（`!`）は最終手段。代わりにガード節を使用
+- 配列/オブジェクトは `readonly` / `ReadonlyArray<T>` を検討
+- `as`は最終手段として使用する、まずはガード節で対応
+- 冗長な型定義は避けてください、既に存在する型定義・ライブラリーが提供しているものを、使用できるかを一度検討してください。
+
+```ts
+const roles = ["admin", "user"] as const;
+type Role = (typeof roles)[number];
+
+function isRole(value: unknown): value is Role {
+  return (
+    typeof value === "string" && (roles as readonly string[]).includes(value)
+  );
+}
+```
+
+## TypeScript/JavaScriptのコーディング規約
+- 配列の操作をする場合は、非破壊的メソッドを使用すること。破壊的メソッドを使用する場合は報告してください。
+- クラスのメソッド以外の全ての関数をアロー関数で記述してください。（thisの動的スコープによるバグを減少させるためです。）（メソッド内のコールバック関数もです。）
+- 配列・オブジェクトの繰り返し処理にはfor文は使用しないで、map()を使用するようにしてください。
+- 回数が決まっている繰り返し処理はfor文でも良いです。
+
+
+## 関数設計
+
+- 単一責任・短い関数。早期リターンでネストを浅く
+- 引数が 3 つ以上ならオブジェクト引数を検討
+- ブール引数は避け、意味のあるオプションに
+- 副作用のある処理は境界層に分離
+- 基本的に純粋関数にする
+
+```ts
+interface FetchUserOptions {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+}
+
+export async function fetchUser(
+  userId: string,
+  options: FetchUserOptions = {}
+): Promise<User> {
+  const { timeoutMs = 5000, signal } = options;
+  // ...
+  return user;
+}
+```
+
+## 制御フロー
+
+- ガード節を優先
+- 判別可能ユニオンは `switch` + 網羅性チェック
+
+```ts
+type State =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "error"; message: string };
+
+function render(state: State): string {
+  switch (state.kind) {
+    case "idle":
+      return "idle";
+    case "loading":
+      return "loading";
+    case "error":
+      return state.message;
+    default: {
+      const exhaustive: never = state;
+      return exhaustive;
+    }
+  }
+}
+```
+
+## エラーハンドリング/ログ
+
+- `try/catch` は境界（API 層/サーバーアクション/ページ境界）で実施
+- `console.log` は禁止（Biome）。必要ならエラーログは `console.error` または既存のロガーを使用
+- 例外はドメインエラー型で明示。ユーザー表示文言は UI 層で決定
+
+```ts
+class DomainError extends Error {
+  readonly code: "VALIDATION" | "NOT_FOUND" | "UNKNOWN";
+  constructor(code: DomainError["code"], message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+```
+
+## 非同期処理
+
+- `async/await` を基本に、未処理 Promise を作らない
+- 複数待機は `Promise.all` / `allSettled`。並列数は必要に応じて制御
+- タイムアウト/キャンセルには `AbortController` を活用
+
+```ts
+await Promise.all([taskA(), taskB()]);
+```
+
+## React/Next.js
+
+- デフォルトはサーバーコンポーネント。クライアントで必要なときのみ `"use client"`
+- クライアント Hooks はトップレベルのみ（ルール: `useHookAtTopLevel`）
+- ページ/レイアウトは Next の規約に従い `default export`
+- それ以外は原則「名前付きエクスポート」
+- イベント型注釈、`useMemo/useCallback` は必要なときのみ
+
+```tsx
+"use client";
+
+export function Counter(): JSX.Element {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
+}
+```
+
+## インポート/エクスポート
+
+- `@/*` の絶対パスを優先
+- バレルは循環を生まない範囲で使用
+- 副作用インポートは先頭にまとめる
+- デフォルトエクスポートは「Next.js の規約が必要な場合のみ」
+
+## コメント/ドキュメント
+
+- 公開 API/複雑な処理には JSDoc
+- コメントは「なぜ」を説明。冗長な内省は避ける
+
+```ts
+/**
+ * ユーザーの公開プロフィールを取得する
+ * - 認可は呼び出し側で完了している前提
+ */
+export async function getPublicProfile(userId: string): Promise<PublicProfile> {
+  /* ... */
+}
+```
+
+## セキュリティ/データ
+
+- 機密値のログ出力禁止
+- Prisma はパラメータ化クエリを使用
+- 入力値は `zod` 等でランタイム検証し、型は `z.infer` で共有
+
+```ts
+import { z } from "zod";
+
+export const UserInput = z.object({ email: z.string().email() });
+export type UserInput = z.infer<typeof UserInput>;
+```
+
+## パフォーマンス
+
+- 不要な再レンダーを避ける。重い計算はメモ化/サーバーへ
+- 動的インポートやサスペンスで分割
+- 画像/アイコンは最適化（`next/image`, SVG 最適化）
+
+## 例外的な許可
+
+- 既存コードとの互換性を優先する場合は、理由をコメントで明記
+- 規約の変更は PR で合意してから適用
