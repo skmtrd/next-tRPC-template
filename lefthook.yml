@@ -10,12 +10,12 @@ pre-commit:
     
 post-merge:
   commands:
-    prisma-db-push-on-schema-change:
+    drizzle-generate-on-schema-change:
       run: |
         BASE_REF=${ORIG_HEAD:-HEAD^}
         CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD | tr -d '\r')
-        if echo "$CHANGED_FILES" | grep -x -q 'prisma/schema.prisma'; then
-          npx prisma db push || exit 1
+        if echo "$CHANGED_FILES" | grep -x -q 'src/db/schema.ts'; then
+          pnpm db:generate || exit 1
         fi
         true
     pnpm-install-on-package-json-change:
