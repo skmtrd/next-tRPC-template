@@ -1,4 +1,5 @@
 import { Container, Typography } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material";
 import type React from "react";
 interface PageContainerProps {
   /**
@@ -10,6 +11,8 @@ interface PageContainerProps {
    * ページのコンテンツ
    */
   children: React.ReactNode;
+
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -23,6 +26,7 @@ const PageContainer: React.FC<PageContainerProps> = (props) => (
       alignItems: "center",
       justifyContent: "center",
       flexDirection: "column",
+      ...props.sx,
     }}
   >
     {!!props.title && <Typography variant="h4">{props.title}</Typography>}
