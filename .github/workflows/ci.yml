@@ -15,14 +15,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/cache@v4
-        id: npm-cache
+        id: pnpm-cache
         with:
-          path: 'node_modules'
-          key: npm-${{ hashFiles('package-lock.json') }}
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
@@ -31,4 +35,4 @@ jobs:
         run: biome ci
 
       - name: TypeScript type checking
-        run: bash -c tsc --noEmit
+        run: tsc --noEmit
