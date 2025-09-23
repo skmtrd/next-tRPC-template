@@ -1,7 +1,10 @@
 import * as schema from "@/db/schema";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const client = createClient({
+  url: process.env.TURSO_DATABASE_URL ?? "",
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-export const db = drizzle(pool, { schema });
+export const db = drizzle(client, { schema });
