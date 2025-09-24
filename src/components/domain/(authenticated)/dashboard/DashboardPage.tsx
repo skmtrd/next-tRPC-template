@@ -2,9 +2,16 @@
 
 import PageContainer from "@/components/common/PageContainer";
 import { authClient } from "@/lib/auth-client";
-import { Box, Button } from "@mui/material";
+import type { UserInfo } from "@/types/user";
+import { Box, Button, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
-const DashboardPage = () => {
+import UserInfoCard from "./UserInfoCard";
+
+interface DashboardPageProps {
+  user: UserInfo;
+}
+
+const DashboardPage = ({ user }: DashboardPageProps) => {
   const router = useRouter();
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -21,13 +28,22 @@ const DashboardPage = () => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           height: "100vh",
           alignItems: "center",
           justifyContent: "center",
+          gap: 3,
+          padding: 2,
         }}
       >
+        <Typography variant="h4" component="h1" textAlign="center">
+          ダッシュボード
+        </Typography>
+
+        <UserInfoCard user={user} />
+
         <Button variant="contained" onClick={handleSignOut}>
-          Logout
+          ログアウト
         </Button>
       </Box>
     </PageContainer>
